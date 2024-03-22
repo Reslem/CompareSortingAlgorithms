@@ -1,6 +1,7 @@
 #include <time.h>
 #include <stdlib.h>
 #include <stdio.h>
+#include <string.h>
 
 int extraMemoryAllocated;
 
@@ -9,7 +10,7 @@ void *Alloc(size_t sz)
 	extraMemoryAllocated += sz;
 	size_t* ret = malloc(sizeof(size_t) + sz);
 	*ret = sz;
-	printf("Extra memory allocated, size: %ld\n", sz);
+	//printf("Extra memory allocated, size: %ld\n", sz);
 	return &ret[1];
 }
 
@@ -17,7 +18,7 @@ void DeAlloc(void* ptr)
 {
 	size_t* pSz = (size_t*)ptr - 1;
 	extraMemoryAllocated -= *pSz;
-	printf("Extra memory deallocated, size: %ld\n", *pSz);
+	//printf("Extra memory deallocated, size: %ld\n", *pSz);
 	free((size_t*)ptr - 1);
 }
 
@@ -28,7 +29,7 @@ size_t Size(void* ptr)
 
 // implements heap sort
 // extraMemoryAllocated counts bytes of memory allocated
-void heapSort(int arr[], int n)
+void heapSort(int arr[], int n, int a)
 {
 }
 
@@ -36,6 +37,52 @@ void heapSort(int arr[], int n)
 // extraMemoryAllocated counts bytes of extra memory allocated
 void mergeSort(int pData[], int l, int r)
 {
+	if (l < r) {
+		int m = l + (r - l) / 2;
+		mergeSort(pData, l, m);
+		mergeSort(pData, m + 1, r);
+
+		int val1 = m - l + 1;
+		int val2 = r - m;
+		int* lArr = (int*)Alloc(sizeof(int) * val1);
+		int* rArr = (int*)Alloc(sizeof(int) * val2);
+
+		for (int i = 0; i < val1; i++) {
+			lArr[i] = pData[l + i];
+		}
+		for (int j = 0; j < val2; j++) {
+			rArr[j] = pData[m + j + 1];
+		}
+
+		int i = 0;
+		int j = 0;
+		while (i < val1 && j < val2) {
+			if (lArr[i] <= rArr[j]) {
+				pData[l] = lArr[i];
+				i++;
+			}
+			else {
+				pData[l] = rArr[j];
+				j++;
+			}
+			l++;
+		}
+
+		while (i < val1) {
+			pData[l] = lArr[i];
+			i++;
+			l++;
+		}
+
+		while (j < val2) {
+			pData[l] = rArr[j];
+			j++;
+			l++;
+		}
+
+		DeAlloc(lArr);
+		DeAlloc(rArr);
+	}
 	
 }
 
@@ -65,6 +112,7 @@ int parseData(char *inputFileName, int **ppData)
 {
 	FILE* inFile = fopen(inputFileName,"r");
 	int dataSz = 0;
+	int i, n, *data;
 	*ppData = NULL;
 	
 	if (inFile)
@@ -73,7 +121,18 @@ int parseData(char *inputFileName, int **ppData)
 		*ppData = (int *)Alloc(sizeof(int) * dataSz);
 		// Implement parse data block
 	}
-	
+	if (*ppData == NULL)
+		{
+			printf("Cannot allocate memory\n");
+			exit(-1);
+		}
+		for (i=0;i<dataSz;++i)
+		{
+			fscanf(inFile, "%d ",&n);
+			data = *ppData + i;
+			*data = n;
+		}
+
 	return dataSz;
 }
 
