@@ -27,10 +27,43 @@ size_t Size(void* ptr)
 	return ((size_t*)ptr)[-1];
 }
 
+void Heapify(int arr[], int n, int a)
+{
+	int left, right;
+	int maxVal = n;
+
+	left = 2 * n + 1;
+	right = 2 * n + 2;
+	
+	if (left < a && arr[left] > arr[maxVal]) {
+		maxVal = left;
+	}
+	if (right < a && arr[right] > arr[maxVal]) {
+		maxVal = right;
+	}
+
+	if (maxVal != n) {
+		int temp = arr[n];
+		arr[n] = arr[maxVal];
+		arr[maxVal] = temp;
+		Heapify(arr, maxVal, a);
+	}
+}
+
 // implements heap sort
 // extraMemoryAllocated counts bytes of memory allocated
 void heapSort(int arr[], int n, int a)
 {
+	for (int i = a/2 - 1; i >= 0; i--) {
+		Heapify(arr, i, a);
+	}
+
+	for (int i = a; i > 0; i--) {
+		int temp = arr[0];
+		arr[0] = arr[i];
+		arr[i] = temp;
+		Heapify(arr, 0, i);
+	}
 }
 
 // implement merge sort
@@ -90,21 +123,50 @@ void mergeSort(int pData[], int l, int r)
 // extraMemoryAllocated counts bytes of memory allocated
 void insertionSort(int* pData, int n)
 {
-	
+	for (int i = 1; i < n; i++) {
+		int j = i;
+		while (j > 0 && pData[j-1] > pData[j]) {
+			int temp = pData[j];
+			pData[j] = pData[j-1];
+			pData[j-1] = temp;
+			j--;
+		}
+	}
 }
 
 // implement bubble sort
 // extraMemoryAllocated counts bytes of extra memory allocated
 void bubbleSort(int* pData, int n)
 {
-	
+	for (int i = 0; i < n; i++) {
+		for (int j = 0; j < n - i - 1; j++) {
+			if (pData[j + 1] < pData[j]) {
+				int temp = pData[j];
+				pData[j] = pData[j + 1];
+				pData[j + 1] = temp;
+			}
+		}
+	}
 }
 
 // implement selection sort
 // extraMemoryAllocated counts bytes of extra memory allocated
 void selectionSort(int* pData, int n)
 {
-	
+	for (int i = 0; i < n; i++) {
+		int minIdx = i;
+		for (int j = i + 1; j < n; j++) {
+			if (pData[j] < pData[minIdx]) {
+				minIdx = j;
+			}
+		}
+		
+		if (minIdx != i) {
+			int temp = pData[i];
+			pData[i] = pData[minIdx];
+			pData[minIdx] = temp;
+		}
+	}
 }
 
 // parses input file to an integer array
